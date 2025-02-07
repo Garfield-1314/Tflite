@@ -12,80 +12,86 @@ valid_dir = os.path.join(base_dir, 'validation')
 # test2_dir = os.path.join(base_dir, 'test2')
 
 
-BATCH_SIZE = 64
-IMG_SIZE = (96, 96)
+
+BATCH_SIZE = 128
+IMG_SIZE = (160, 160)
 
 train_dataset = tf.keras.utils.image_dataset_from_directory(train_dir,
-                                                            shuffle=True,
+                                                            validation_split=0.2,
+                                                            subset="training",
+                                                            seed=12,
                                                             batch_size=BATCH_SIZE,
                                                             image_size=IMG_SIZE)
 
 validation_dataset = tf.keras.utils.image_dataset_from_directory(valid_dir,
-                                                                 shuffle=True,
+                                                                 validation_split=0.2,
+                                                                 subset="validation",
+                                                                 seed=12,
                                                                  batch_size=BATCH_SIZE,
                                                                  image_size=IMG_SIZE)
 
-class_names = train_dataset.class_names
-print(class_names)
+print(train_dataset.class_names)
+class_len=len(train_dataset.class_names)
+print(class_len)
 
 
-val_batches = tf.data.experimental.cardinality(validation_dataset)
-test_dataset = validation_dataset.take(val_batches // 5)
-validation_dataset = validation_dataset.skip(val_batches // 5)
-
-print('Number of validation batches: %d' % tf.data.experimental.cardinality(validation_dataset))
-print('Number of test batches: %d' % tf.data.experimental.cardinality(test_dataset))
-
-
-data_augmentation = tf.keras.Sequential([
-  tf.keras.layers.RandomFlip('horizontal'),
-  tf.keras.layers.RandomRotation(0.2),
-])
+plt.figure(figsize=(10, 10))
+for images, labels in train_dataset.take(1):
+  for i in range(9):
+    ax = plt.subplot(3, 3, i + 1)
+    plt.imshow(images[i].numpy().astype("uint8"))
+    plt.title(train_dataset.class_names[labels[i]])
+    plt.axis("off")
 
 
-preprocess_input = tf.keras.applications.mobilenet.preprocess_input
-normalization_layer = tf.keras.layers.Rescaling(1./255)
-
-normalized_ds = train_dataset.map(lambda x, y: (normalization_layer(x), y))
-image_batch, labels_batch = next(iter(normalized_ds))
-
-# Create the base model from the pre-trained model MobileNet
 IMG_SHAPE = IMG_SIZE + (3,)
 base_model = tf.keras.applications.MobileNet(input_shape=IMG_SHAPE,
                                                include_top=False,
                                                alpha=0.25,
                                                weights='imagenet')
-
-image_batch, label_batch = next(iter(train_dataset))
-feature_batch = base_model(image_batch)
-print(feature_batch.shape)
-
-base_model.trainable = False
+base_model.trainable = True
 base_model.summary()
 
+normalization_layer = tf.keras.layers.Rescaling(1. / 127.5,input_shape=(160, 160, 3)) 
+normalized_ds = train_dataset.map(lambda x, y: (normalization_layer(x), y))
+image_batch, labels_batch = next(iter(normalized_ds))
+first_image = image_batch[0]
+print(np.min(first_image), np.max(first_image))
 
 model = tf.keras.Sequential([
+  normalization_layer,
+  tf.keras.layers.RandomFlip("horizontal_and_vertical"),
+  tf.keras.layers.RandomBrightness(0.3),
+  tf.keras.layers.RandomContrast(0.3),
+  tf.keras.layers.RandomHeight(0.3),
+  tf.keras.layers.RandomRotation(1,seed=12),
+  tf.keras.layers.RandomZoom(height_factor=0.4,fill_value=0.3),
   base_model,
+  # tf.keras.layers.Conv2D(64, 3),
+  # tf.keras.layers.Conv2D(32, 32),
+  # tf.keras.layers.Dense(32, activation='relu'),
+  # tf.keras.layers.BatchNormalization(),
+  # tf.keras.layers.Conv2D(64, 3, activation='relu'),
+  # tf.keras.layers.Dense(32, activation='relu'),
   tf.keras.layers.GlobalAveragePooling2D(),
-  tf.keras.layers.Dense(1)
+  tf.keras.layers.Dense(class_len,activation='softmax')
 ])
 
-base_learning_rate = 0.001
+base_learning_rate = 0.01
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=base_learning_rate),
-              loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 model.summary()
-len(model.trainable_variables)
 
-initial_epochs = 10
+initial_epochs = 100
 
 loss0, accuracy0 = model.evaluate(validation_dataset)
 print("initial loss: {:.2f}".format(loss0))
 print("initial accuracy: {:.2f}".format(accuracy0))
 
 history = model.fit(train_dataset,
-                    epochs=initial_epochs,
-                    validation_data=validation_dataset)
+                    validation_data=validation_dataset,
+                    epochs=initial_epochs)
 
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
@@ -94,23 +100,24 @@ loss = history.history['loss']
 val_loss = history.history['val_loss']
 
 
-def representative_data_gen():
-  for input_value in tf.data.Dataset.from_tensor_slices(image_batch).batch(1).take(100): #必须归一化处理之后才可以传入参数
-    yield [input_value]
+def representative_dataset():
+  for data in tf.data.Dataset.from_tensor_slices((images)).batch(1).take(100000):
+    yield [tf.dtypes.cast(data, tf.float32)]
 
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 tflite_model = converter.convert()
-converter.representative_dataset = representative_data_gen
+converter.representative_dataset = representative_dataset
 converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
 converter.inference_input_type = tf.int8
 converter.inference_output_type = tf.int8
 tflite_model_quant = converter.convert()
 
-# 保存模型
-model.save('./model/orginal.h5') # 保存原始模型
 
-open('./model/mnist_model.tflite', "wb").write(tflite_model) # 保存tflite-float32位原始模型
+# 保存模型
+# model.save('./model/orginal.h5') # 保存原始模型
+
+open('./model/mnist_model.tflite', "wb").write(tflite_model) # 保存tflite-float32原始模型
 
 open('./model/mnist_model_quant.tflite', "wb").write(tflite_model_quant) # 保存tflite-int8量化模型
 
@@ -119,7 +126,6 @@ input_type = interpreter.get_input_details()[0]['dtype']
 print('input: ', input_type)
 output_type = interpreter.get_output_details()[0]['dtype']
 print('output: ', output_type)
-
 
 plt.figure(figsize=(8, 8))
 plt.subplot(2, 1, 1)
@@ -139,4 +145,3 @@ plt.ylim([0,1.0])
 plt.title('Training and Validation Loss')
 plt.xlabel('epoch')
 plt.show()
-
