@@ -427,19 +427,19 @@ def hue_image(rootpath,savepath):
 
 if __name__ == "__main__":
 
-    root_path = r"dataset/train"
+    root_path = r"dataset/YASUO_80"
 
-    save_path = r"dataset/train"
-    YASUO_80(root_path,save_path)   #图像压缩---任意比例
+    save_path = r"dataset/YASUO_80"
+    # YASUO_80(root_path,save_path)   #图像压缩---任意比例
 
-    save_path = r"dataset/train"
-    Rotate_90_180_270(root_path,save_path)    #图像旋转---可任意角度
+    # save_path = r"dataset/train"
+    # Rotate_90_180_270(root_path,save_path)    #图像旋转---可任意角度
 
     # save_path = r"dataset/hue"
     # hue_image(root_path,save_path)    #图像色调扰动---可任意参数
 
     # save_path = r"dataset/D_B"
-    # D_dan_B(root_path,save_path)    #图像明暗扰动---可任意参数
+    D_dan_B(root_path,save_path)    #图像明暗扰动---可任意参数
 
     # save_path = r"dataset/Cont"
     # Contrast_image(root_path,save_path)    #图像对比度扰动---可任意参数

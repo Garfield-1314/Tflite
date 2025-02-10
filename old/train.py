@@ -8,8 +8,8 @@ tf.get_logger().setLevel('ERROR')
 
 # 数据集路径
 base_dir = './dataset'
-train_dir = os.path.join(base_dir, 'train')
-valid_dir = os.path.join(base_dir, 'validation')
+train_dir = os.path.join(base_dir, 'Origin')
+valid_dir = os.path.join(base_dir, 'Origin')
 
 # 超参数设置
 BATCH_SIZE = 128
