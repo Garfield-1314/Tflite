@@ -86,7 +86,7 @@ model.summary()
 
 # 🔹 指数学习率衰减
 lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-    initial_learning_rate=0.01, decay_steps=10000, decay_rate=0.96, staircase=True)
+    initial_learning_rate=0.0001, decay_steps=10000, decay_rate=0.96, staircase=True)
 
 # 编译模型
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
