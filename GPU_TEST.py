@@ -1,19 +1,15 @@
 import tensorflow as tf
 
-# 检查 TensorFlow 是否可以访问 GPU
-gpus = tf.config.list_physical_devices('GPU')
+# 打印 TensorFlow 版本
+print("TensorFlow 版本:", tf.__version__)
 
-if gpus:
-    print("CUDA GPU 可用！")
-    # 打印 GPU 信息
-    for gpu in gpus:
-        print(f"GPU 名称: {gpu.name}")
-else:
-    print("没有检测到 GPU，可能没有启用 CUDA。")
+# 检测是否使用了 GPU
+gpu_available = tf.test.is_gpu_available()
+print("GPU 是否可用:", gpu_available)
 
-# 检查 TensorFlow 是否检测到 CUDA 设备
-cuda_available = tf.test.is_built_with_cuda()
-if cuda_available:
-    print("TensorFlow 是基于 CUDA 构建的。")
+# 打印 CUDA 版本
+if gpu_available:
+    print("CUDA 版本:", tf.sysconfig.get_build_info()["cuda_version"])
+    print("cuDNN 版本:", tf.sysconfig.get_build_info()["cudnn_version"])
 else:
-    print("TensorFlow 并未基于 CUDA 构建。")
+    print("CUDA 版本: 未检测到 GPU")
