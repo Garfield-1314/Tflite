@@ -6,6 +6,7 @@ import numpy as np
 import os
 import tensorflow as tf
 import seaborn as sns
+from tqdm import tqdm
 from sklearn.metrics import confusion_matrix
 
 # 设定日志级别，减少不必要的输出
@@ -103,7 +104,7 @@ history = model.fit(train_dataset, validation_data=validation_dataset,
 
 # 🔹 代表性数据集（INT8 量化）
 def representative_dataset():
-    for image_batch, _ in train_dataset.take(5000):
+    for image_batch, _ in tqdm(train_dataset.take(5000), total=5000, desc="Processing"):
         yield [tf.cast(image_batch[0:1], tf.float32)]  # 仅返回单张图片
 
 # 🔹 量化模型为 TFLite INT8
