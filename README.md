@@ -13,4 +13,4 @@
 
 # 1、安装windows下的cuda11.8和cudnn
 # 2、安装conda环境下的tensorflow：pip install -i https://pypi.tuna.tsinghua.edu.cn/simple tensorflow-gpu==2.10.0
-# 3、安装conda环境下的matplotlib、seaborn、scikit-learn：pip install -i https://pypi.tuna.tsinghua.edu.cn/simple matplotlib seaborn scikit-learn opencv-Python3
+# 3、安装conda环境下的matplotlib、seaborn、scikit-learn：pip install -i https://pypi.tuna.tsinghua.edu.cn/simple matplotlib seaborn scikit-learn opencv-Python tqdm
