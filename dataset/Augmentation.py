@@ -254,7 +254,7 @@ def YASUO_80(rootpath,savepath):
 
             img_i = cv2.imread(file_i_path)
 
-            img_yasuo = compress_img_CV(img_i,compress_rate=0.5)
+            img_yasuo = compress_img_CV(img_i,compress_rate=0.06)
             cv2.imwrite(os.path.join(save_path, file_i[:-4] + "_80.jpg"),img_yasuo)
 ####################压缩图片###########################################
 ####################压缩图片###########################################
@@ -286,7 +286,7 @@ def D_dan_B(rootpath,savepath):
 
             img_i = cv2.imread(file_i_path)
 
-            img_dar = Darker_Brighter(img_i,1.25)
+            img_dar = Darker_Brighter(img_i,1.5)
             cv2.imwrite(os.path.join(save_path, file_i[:-4] + "_" + str(1.25) + "_bar.jpg"), img_dar)
 
           
@@ -419,19 +419,19 @@ def hue_image(rootpath,savepath):
 
 if __name__ == "__main__":
 
-    root_path = r"dataset/YASUO_80"
+    root_path = r"dataset/Origin"
 
     save_path = r"dataset/YASUO_80"
-    # YASUO_80(root_path,save_path)   #图像压缩---任意比例
+    YASUO_80(root_path,save_path)   #图像压缩---任意比例
 
-    # save_path = r"dataset/train"
+    # save_path = r"dataset/Rotate"
     # Rotate_90_180_270(root_path,save_path)    #图像旋转---可任意角度
 
     # save_path = r"dataset/hue"
     # hue_image(root_path,save_path)    #图像色调扰动---可任意参数
 
     # save_path = r"dataset/D_B"
-    D_dan_B(root_path,save_path)    #图像明暗扰动---可任意参数
+    # D_dan_B(root_path,save_path)    #图像明暗扰动---可任意参数
 
     # save_path = r"dataset/Cont"
     # Contrast_image(root_path,save_path)    #图像对比度扰动---可任意参数
