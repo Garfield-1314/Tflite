@@ -14,11 +14,11 @@ tf.get_logger().setLevel('ERROR')
 
 # 🔹 数据集路径
 base_dir = './dataset'
-train_dir = os.path.join(base_dir, 'Origin')
-valid_dir = os.path.join(base_dir, 'Origin')
+train_dir = os.path.join(base_dir, 'YASUO_80')
+valid_dir = os.path.join(base_dir, 'YASUO_80')
 
 # 🔹 超参数
-BATCH_SIZE = 128
+BATCH_SIZE = 4
 IMG_SIZE = (160, 160)
 AUTOTUNE = tf.data.AUTOTUNE
 
@@ -69,7 +69,7 @@ base_model = tf.keras.applications.MobileNet(
 
 # 仅微调最后4层
 base_model.trainable = True
-for layer in base_model.layers[:-10]:
+for layer in base_model.layers[:-0]:
     layer.trainable = False
 
 base_model.summary()
@@ -86,7 +86,7 @@ model.summary()
 
 # 🔹 指数学习率衰减
 lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-    initial_learning_rate=0.0001, decay_steps=10000, decay_rate=0.96, staircase=True)
+    initial_learning_rate=0.0001, decay_steps=10000, decay_rate=0.90, staircase=True)
 
 # 编译模型
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
@@ -94,12 +94,12 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
               metrics=['accuracy'])
 
 # 训练回调（去掉 ReduceLROnPlateau）
-early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=100, restore_best_weights=True)
+early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 
 
 # 训练模型
 history = model.fit(train_dataset, validation_data=validation_dataset,
-                    epochs=100, callbacks=[early_stopping])
+                    epochs=25, callbacks=[early_stopping])
 
 # 🔹 代表性数据集（INT8 量化）
 def representative_dataset():
