@@ -290,8 +290,8 @@ def D_dan_B(rootpath,savepath):
             cv2.imwrite(os.path.join(save_path, file_i[:-4] + "_" + str(1.25) + "_bar.jpg"), img_dar)
 
           
-            # img_bar = Darker_Brighter(img_i,0.75)
-            # cv2.imwrite(os.path.join(save_path, file_i[:-4] + "_" + str(0.75) + "_dar.jpg"), img_bar)                        
+            img_bar = Darker_Brighter(img_i,0.75)
+            cv2.imwrite(os.path.join(save_path, file_i[:-4] + "_" + str(0.75) + "_dar.jpg"), img_bar)                        
 ####################亮暗###########################################
 ####################亮暗###########################################
 ####################亮暗###########################################
@@ -417,12 +417,12 @@ def hue_image(rootpath,savepath):
 #     cv2.imshow("Img 2", img2)
 #     cv2.waitKey(0)
 
-if __name__ == "__main__":
+def runs():
 
-    root_path = r"dataset/Origin"
+    root_path = r"dataset\stage2\test"
 
-    save_path = r"dataset/YASUO_80"
-    YASUO_80(root_path,save_path)   #图像压缩---任意比例
+    save_path = r"dataset\stage3\test"
+    # YASUO_80(root_path,save_path)   #图像压缩---任意比例
 
     # save_path = r"dataset/Rotate"
     # Rotate_90_180_270(root_path,save_path)    #图像旋转---可任意角度
@@ -431,7 +431,7 @@ if __name__ == "__main__":
     # hue_image(root_path,save_path)    #图像色调扰动---可任意参数
 
     # save_path = r"dataset/D_B"
-    # D_dan_B(root_path,save_path)    #图像明暗扰动---可任意参数
+    D_dan_B(root_path,save_path)    #图像明暗扰动---可任意参数
 
     # save_path = r"dataset/Cont"
     # Contrast_image(root_path,save_path)    #图像对比度扰动---可任意参数
@@ -441,6 +441,8 @@ if __name__ == "__main__":
 
     # save_path = r"dataset/GS"
     # G_and_S(root_path,save_path)           #图像高斯和椒盐噪声扰动---可任意参数
-    
+
+if __name__ == "__main__":
+    runs()
  
 
