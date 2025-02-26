@@ -95,12 +95,13 @@ def runs():
     )
 
     root_path = r"dataset\stage1"
-    save_path = r"dataset\stage1"
-    Au.Rotate_90_180_270(root_path,save_path)
-
-    root_path = r"dataset\stage1"
     save_path = r"dataset\stage2"
     Au.YASUO_80(root_path,save_path)
+
+    root_path = r"dataset\stage2"
+    save_path = r"dataset\stage2"
+    Au.Rotate_90_180_270(root_path,save_path)
+
 
     root_path = r"dataset\stage2"
     save_path = r"dataset\stage3"
